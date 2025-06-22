@@ -9,7 +9,7 @@ A simple network and port scanner built with Python and CustomTkinter.
 1.  **Clone the repository:**
 
     ```bash
-    git clone [https://github.com/shirshxk/JaalBreak](https://github.com/shirshxk/JaalBreak)
+    git clone https://github.com/shirshxk/JaalBreak
     cd JaalBreak
     ```
 
