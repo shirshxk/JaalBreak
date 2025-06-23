@@ -5,6 +5,8 @@ from customtkinter import CTkImage
 import subprocess
 import threading
 import os
+import re
+import shutil
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
@@ -12,6 +14,12 @@ from reportlab.lib.utils import ImageReader
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
+
+def is_valid_subnet(subnet):
+    return re.match(r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$', subnet)
+
+def is_valid_ip(ip):
+    return re.match(r'^(\d{1,3}\.){3}\d{1,3}$', ip)
 
 class JaalBreak(ctk.CTk):
     def __init__(self):
@@ -25,8 +33,7 @@ class JaalBreak(ctk.CTk):
         except:
             pass
 
-        self.device_scan_results = []
-        self.advanced_scan_results_raw = ""
+        self.scan_result_raw = ""
 
         self.sidebar = ctk.CTkFrame(self, width=180, corner_radius=0)
         self.sidebar.pack(side="left", fill="y")
@@ -146,7 +153,6 @@ class JaalBreak(ctk.CTk):
 
         self.textbox_results = ctk.CTkTextbox(tab, width=900, height=470, font=("Consolas", 12), wrap="word")
         self.textbox_results.pack(padx=15, pady=10)
-
         self.textbox_results.tag_config("ip", foreground="lightblue")
 
         self.progress_bar = ctk.CTkProgressBar(tab, width=900)
@@ -175,8 +181,12 @@ class JaalBreak(ctk.CTk):
         self.tabs.set("Results")
 
         subnet = self.entry_subnet.get().strip()
-        if not subnet:
-            messagebox.showerror("Error", "Please enter a subnet.")
+
+        if shutil.which("nmap") is None:
+            messagebox.showerror("Nmap Error", "Nmap is not installed or not added to PATH.")
+            return
+        if not is_valid_subnet(subnet):
+            messagebox.showerror("Invalid Input", "Please enter a valid subnet in format x.x.x.x/xx")
             return
 
         nmap_command = ["nmap", "-sn", subnet]
@@ -184,9 +194,9 @@ class JaalBreak(ctk.CTk):
 
         def run():
             process = subprocess.Popen(nmap_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            self.advanced_scan_results_raw = ""
+            self.scan_result_raw = ""
             for line in process.stdout:
-                self.advanced_scan_results_raw += line
+                self.scan_result_raw += line
                 self.textbox_results.insert("end", line)
                 self.textbox_results.see("end")
             self.progress_bar.set(1)
@@ -199,8 +209,12 @@ class JaalBreak(ctk.CTk):
         self.tabs.set("Results")
 
         target = self.entry_advanced_target.get().strip()
-        if not target:
-            messagebox.showerror("Error", "Please enter a target IP or hostname.")
+
+        if shutil.which("nmap") is None:
+            messagebox.showerror("Nmap Error", "Nmap is not installed or not added to PATH.")
+            return
+        if not is_valid_ip(target):
+            messagebox.showerror("Invalid Input", "Please enter a valid IPv4 address.")
             return
 
         selected_flags = []
@@ -244,9 +258,9 @@ class JaalBreak(ctk.CTk):
 
         def run():
             process = subprocess.Popen(nmap_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            self.advanced_scan_results_raw = ""
+            self.scan_result_raw = ""
             for line in process.stdout:
-                self.advanced_scan_results_raw += line
+                self.scan_result_raw += line
                 self.textbox_results.insert("end", line)
                 self.textbox_results.see("end")
             self.progress_bar.set(1)
@@ -254,7 +268,7 @@ class JaalBreak(ctk.CTk):
         threading.Thread(target=run).start()
 
     def export_to_pdf(self):
-        if not self.advanced_scan_results_raw.strip():
+        if not self.scan_result_raw.strip():
             messagebox.showwarning("No Data", "No scan data to export.")
             return
 
@@ -281,7 +295,7 @@ class JaalBreak(ctk.CTk):
 
             c.setFont("Courier", 10)
             text = c.beginText(40, height - 130)
-            for line in self.advanced_scan_results_raw.splitlines():
+            for line in self.scan_result_raw.splitlines():
                 if text.getY() <= 50:
                     c.drawText(text)
                     c.showPage()
