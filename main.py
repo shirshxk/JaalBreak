@@ -8,7 +8,7 @@ import os
 import re
 import shutil
 from datetime import datetime
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen import canvas 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 
@@ -41,7 +41,7 @@ class JaalBreak(ctk.CTk):
         try:
             image_path = os.path.join(os.path.dirname(__file__), "logo.png")
             image = Image.open(image_path)
-            self.logo_image = CTkImage(light_image=image, dark_image=image, size=(140, 50))
+            self.logo_image = CTkImage(dark_image=image, size=(140, 50))
             self.sidebar_logo = ctk.CTkLabel(self.sidebar, image=self.logo_image, text="", anchor="center")
             self.sidebar_logo.pack(pady=(15, 5))
         except Exception as e:
@@ -125,7 +125,6 @@ class JaalBreak(ctk.CTk):
 
         self.scan_flags = {**self.safe_scan_flags, **self.aggressive_scan_flags}
         self.scan_vars = {}
-        self.scan_checkboxes = {}
 
         ctk.CTkLabel(frame, text="Safe Scans", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(10, 0))
         for label_text in self.safe_scan_flags:
@@ -133,7 +132,6 @@ class JaalBreak(ctk.CTk):
             chk = ctk.CTkCheckBox(frame, text=label_text, variable=var)
             chk.pack(anchor="w")
             self.scan_vars[label_text] = var
-            self.scan_checkboxes[label_text] = chk
 
         ctk.CTkLabel(frame, text="Aggressive Scans", font=ctk.CTkFont(size=14, weight="bold")).pack(anchor="w", pady=(10, 0))
         for label_text in self.aggressive_scan_flags:
@@ -141,7 +139,6 @@ class JaalBreak(ctk.CTk):
             chk = ctk.CTkCheckBox(frame, text=label_text, variable=var)
             chk.pack(anchor="w")
             self.scan_vars[label_text] = var
-            self.scan_checkboxes[label_text] = chk
 
         btn_scan = ctk.CTkButton(tab, text="Start Advanced Scan", command=self.run_advanced_scan)
         btn_scan.pack(pady=10)
