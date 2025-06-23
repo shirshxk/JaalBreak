@@ -15,11 +15,8 @@ from reportlab.lib.utils import ImageReader
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-def is_valid_subnet(subnet):
-    return re.match(r'^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$', subnet)
-
-def is_valid_ip(ip):
-    return re.match(r'^(\d{1,3}\.){3}\d{1,3}$', ip)
+def is_valid_ip_or_subnet(value):
+    return re.match(r'^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$', value)
 
 class JaalBreak(ctk.CTk):
     def __init__(self):
@@ -150,7 +147,6 @@ class JaalBreak(ctk.CTk):
 
         self.textbox_results = ctk.CTkTextbox(tab, width=900, height=470, font=("Consolas", 12), wrap="word")
         self.textbox_results.pack(padx=15, pady=10)
-        self.textbox_results.tag_config("ip", foreground="lightblue")
 
         self.progress_bar = ctk.CTkProgressBar(tab, width=900)
         self.progress_bar.pack(pady=10)
@@ -173,47 +169,26 @@ class JaalBreak(ctk.CTk):
             self.scan_vars["Intense Scan (Prompt)"].set(True)
 
     def run_network_scan(self):
-        self.textbox_results.delete("1.0", "end")
-        self.progress_bar.set(0)
-        self.tabs.set("Results")
-
-        subnet = self.entry_subnet.get().strip()
-
-        if shutil.which("nmap") is None:
-            messagebox.showerror("Nmap Error", "Nmap is not installed or not added to PATH.")
-            return
-        if not is_valid_subnet(subnet):
-            messagebox.showerror("Invalid Input", "Please enter a valid subnet in format x.x.x.x/xx")
+        target = self.entry_subnet.get().strip()
+        if not self.validate_nmap_installed():
             return
 
-        nmap_command = ["nmap", "-sn", subnet]
-        self.textbox_results.insert("end", f"Running: {' '.join(nmap_command)}\n\n")
+        if not is_valid_ip_or_subnet(target):
+            messagebox.showerror("Invalid Input", "Enter a valid IPv4 address or subnet (x.x.x.x or x.x.x.x/xx)")
+            return
 
-        def run():
-            process = subprocess.Popen(nmap_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            self.scan_result_raw = ""
-            for line in process.stdout:
-                self.scan_result_raw += line
-                self.textbox_results.insert("end", line)
-                self.textbox_results.see("end")
-            self.progress_bar.set(1)
+        nmap_command = ["nmap", "-sn", target]
+        self.prepare_scan_results_view(nmap_command)
+        self.execute_nmap_command(nmap_command)
 
-        threading.Thread(target=run).start()
 
     def run_advanced_scan(self):
-        self.textbox_results.delete("1.0", "end")
-        self.progress_bar.set(0)
-        self.tabs.set("Results")
-
         target = self.entry_advanced_target.get().strip()
-
-        if shutil.which("nmap") is None:
-            messagebox.showerror("Nmap Error", "Nmap is not installed or not added to PATH.")
+        if not self.validate_nmap_installed():
             return
-        if not is_valid_ip(target):
-            messagebox.showerror("Invalid Input", "Please enter a valid IPv4 address.")
+        if not is_valid_ip_or_subnet(target):
+            messagebox.showerror("Invalid Input", "Enter a valid IPv4 address or subnet (x.x.x.x or x.x.x.x/xx)")
             return
-
         selected_flags = []
         selected_keys = []
         intense_level = None
@@ -251,17 +226,30 @@ class JaalBreak(ctk.CTk):
             return
 
         nmap_command = ["nmap", "-vvv"] + selected_flags + [target]
-        self.textbox_results.insert("end", f"Running: {' '.join(nmap_command)}\n\n")
+        self.prepare_scan_results_view(nmap_command)
+        self.execute_nmap_command(nmap_command)
 
+    def validate_nmap_installed(self):
+        if shutil.which("nmap") is None:
+            messagebox.showerror("Nmap Error", "Nmap is not installed or not added to PATH.")
+            return False
+        return True
+
+    def prepare_scan_results_view(self, command):
+        self.textbox_results.delete("1.0", "end")
+        self.progress_bar.set(0)
+        self.tabs.set("Results")
+        self.textbox_results.insert("end", f"Running: {' '.join(command)}\n\n")
+
+    def execute_nmap_command(self, command):
         def run():
-            process = subprocess.Popen(nmap_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             self.scan_result_raw = ""
             for line in process.stdout:
                 self.scan_result_raw += line
                 self.textbox_results.insert("end", line)
                 self.textbox_results.see("end")
             self.progress_bar.set(1)
-
         threading.Thread(target=run).start()
 
     def export_to_pdf(self):
