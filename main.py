@@ -12,7 +12,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("black")
 ctk.set_default_color_theme("blue")
 
 def is_valid_ip_or_subnet(value):
