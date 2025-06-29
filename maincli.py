@@ -53,7 +53,7 @@ def run_nmap_command(command):
 
 def prompt_export(result):
     while True:
-        choice = input(Fore.YELLOW + "\nDo you want to export the result to PDF? (y/n): " + Fore.WHITE).strip().lower()
+        choice = input(Fore.YELLOW + "\nDo you want to export the result in PDF? (y/n): " + Fore.WHITE).strip().lower()
         if choice == 'y':
             filename = input(Fore.YELLOW + "Enter PDF file name (without extension): " + Fore.WHITE).strip()
             export_to_pdf(result, filename + ".pdf")
