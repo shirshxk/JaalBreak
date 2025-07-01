@@ -38,7 +38,6 @@ def validate_nmap():
         print(Fore.RED + "[!] Nmap not found. Install it and add to PATH.")
         return False
     return True
-
 def run_nmap_command(command):
     print(Fore.GREEN + f"\n[+] Running: {' '.join(command)}\n")
     result = ""
@@ -47,8 +46,15 @@ def run_nmap_command(command):
         for line in process.stdout:
             print(Fore.WHITE + line.strip())
             result += line
+        process.wait()
+        if process.returncode != 0:
+            error_msg = "Error: Execution failed"
+            print(error_msg)  # ← Plain for testing
+            result += error_msg + "\n"
     except Exception as e:
-        print(Fore.RED + f"Error: {e}")
+        error_msg = f"Error: {e}"
+        print(error_msg)  # ← Plain for testing
+        result += error_msg + "\n"
     return result
 
 def prompt_export(result):
@@ -105,11 +111,13 @@ def prompt_intensity():
     while True:
         level = input(Fore.YELLOW + "Do you want to add intensity level (-T)? Enter 1–5 or press Enter to skip: " + Fore.WHITE).strip()
         if not level:
+            print("[+] Skipping intensity selection.")  # ← Plain for testing
             return None
         if level in ['1','2','3','4','5']:
+            print(f"[+] Intensity level set to: -T{level}")  # ← Plain for testing
             return f"-T{level}"
-        print(Fore.RED + "[!] Invalid intensity level.")
-
+        print("[!] Invalid intensity level.")  # ← Plain for testing
+        
 def basic_scan():
     while True:
         subnet = input(Fore.YELLOW + "Enter subnet (e.g. 192.168.1.0/24) or type 'back' to return: " + Fore.WHITE).strip()
