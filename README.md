@@ -1,8 +1,51 @@
 # JaalBreak Scanner
 ![JaalBreak Logo](logo.png)
-A simple network and port scanner built with Python and CustomTkinter.
+JaalBreak is a Python-based network scanning tool featuring both a command-line interface (CLI) and a graphical user interface (GUI) using CustomTkinter. It is built on top of Nmap and designed for penetration testers, network analysts, and students.
 
----
+## Features
+
+- Dual Interface: CLI and GUI
+- Preset-based scanning (Stealth, Aggressive, OS Detection, etc.)
+- Subnet and individual IP scanning
+- Real-time output from subprocess
+- Threaded GUI execution to prevent freezing
+- Export scan results as PDF using ReportLab
+- Clean, styled GUI with CustomTkinter
+- Input validation and conflict handling
+
+## CLI Preview
+
+```
+$ python3 maincli.py
+
+    _____                      __  _______                                 __       
+   /     |                    /  |/       \                               /  |      
+   $$$$$ |  ______    ______  $$ |$$$$$$$  |  ______    ______    ______  $$ |   __ 
+      $$ | /      \  /      \ $$ |$$ |__$$ | /      \  /      \  /      \ $$ |  /  |
+ __   $$ | $$$$$$  | $$$$$$  |$$ |$$    $$< /$$$$$$  |/$$$$$$  | $$$$$$  |$$ |_/$$/ 
+/  |  $$ | /    $$ | /    $$ |$$ |$$$$$$$  |$$ |  $$/ $$    $$ | /    $$ |$$   $$<  
+$$ \__$$ |/$$$$$$$ |/$$$$$$$ |$$ |$$ |__$$ |$$ |      $$$$$$$$/ /$$$$$$$ |$$$$$$  \ 
+$$    $$/ $$    $$ |$$    $$ |$$ |$$    $$/ $$ |      $$       |$$    $$ |$$ | $$  |
+ $$$$$$/   $$$$$$$/  $$$$$$$/ $$/ $$$$$$$/  $$/        $$$$$$$/  $$$$$$$/ $$/   $$/ 
+
+Choose an option:
+1. Scan
+2. Help
+3. Exit
+```
+
+## GUI Features
+
+- Scan Tab: Basic subnet scan (Nmap -sn)
+- Advanced Tab: Checkbox and dropdown flags
+- Results Tab: Real-time output + PDF export
+- Thread-safe subprocess handling
+- Styled layout and input prompts
+
+## Requirements
+
+- Python 3.6+
+- Nmap installed and available in PATH
 
 ## Setup
 
@@ -30,8 +73,6 @@ A simple network and port scanner built with Python and CustomTkinter.
 ---
 
 ## Runtime Architecture
-
-### CLI
 
 ```mermaid
 flowchart TD
@@ -93,61 +134,42 @@ flowchart TD
     style M4 fill:#666,color:white
 ```
 
-### GUI
+## Running the Application
 
-```mermaid
-flowchart TD
-    A[Start GUI App] --> B[Show Sidebar & Tabs] --> C{User Chooses Tab}
-    C -->|Scan| D[Enter Subnet]
-    C -->|Advanced| E[Preset or Manual Flags]
-    C -->|Help| F[Show Help Dialog]
-    C -->|Exit| G[Close App]
+### CLI Version
 
-    %% Scan Branch
-    D --> H[Validate Input]
-    H --> I[Build Nmap -sn]
-    I --> J[Run Scan in Thread]
-    J --> K[Stream Output to Textbox]
-    K --> L{Export PDF?}
-    L -->|Yes| M[Export with ReportLab]
-    L -->|No| N[Skip Export]
-    M --> O[Return to Tabs]
-    N --> O
-    O -.-> B
-
-    %% Advanced Branch
-    E --> P[Validate Flags/Conflicts]
-    P --> Q[Build Advanced Command]
-    Q --> J
-
-    %% Help and Exit
-    F --> R[Return to Tabs]
-    G --> S[App Closed]
-    R -.-> B
-
-    %% Invisible links for horizontal balance
-    D --- E
-    E --- F
-    F --- G
-
-    %% STYLES - Strictly A-J cycling
-    style A fill:#222,color:white
-    style B fill:#333,color:white
-    style C fill:#444,color:white
-    style D fill:#555,color:white
-    style E fill:#666,color:white
-    style F fill:#777,color:white
-    style G fill:#2d2d2d,color:white
-    style H fill:#2a2a2a,color:white
-    style I fill:#383838,color:white
-    style J fill:#444,color:white
-    style K fill:#555,color:white
-    style L fill:#666,color:white
-    style M fill:#777,color:white
-    style N fill:#2d2d2d,color:white
-    style O fill:#2a2a2a,color:white
-    style P fill:#383838,color:white
-    style Q fill:#444,color:white
-    style R fill:#555,color:white
-    style S fill:#666,color:white
 ```
+python3 maincli.py
+```
+
+### GUI Version
+
+```
+python3 main.py
+```
+
+## File Structure
+
+- `maincli.py`: CLI implementation
+- `main.py`: GUI implementation using CustomTkinter
+- `README.md`: This file
+
+## Notes
+
+- Works best on Linux or WSL with Nmap configured
+- GUI is cross-platform but Nmap must be installed
+- PDF export requires write permissions
+
+## LICENSE
+
+This project is licensed for educational and research purposes only, developed under the ST5062CEM Programming and Algorithm 2 module (Softwarica College).
+
+---
+
+## CREDITS
+
+Developed by Shirshak Shrestha for coursework submission, July 2025
+
+Course: Programming & Algorithm 2  
+Module Code: ST5062CEM  
+Instructor: Suman Shrestha
